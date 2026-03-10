@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 JSO Career Intelligence Agent
 
-## Getting Started
+An AI-powered job matching platform that analyzes resumes against job descriptions using a local LLM (Ollama) or a cloud model via OpenRouter. Built with Next.js, Tailwind CSS, and the Vercel AI SDK.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Features
+
+| Capability | Description |
+|---|---|
+| **Profile Ingestion** | Understands career intent, domain, seniority, and years of experience from raw resume text |
+| **Dynamic Matching** | Calculates a JSO Fit Score (0–100%) based on skill overlap and experience alignment |
+| **Gap Analysis** | Identifies missing skills with severity ratings (Critical / Moderate / Minor) and actionable fix recommendations |
+| **Bidirectional Value** | Generates an HR Consultant Insight paragraph — useful for both the candidate and the recruiter |
+
+---
+
+## 🏗️ Architecture
+
+![JSO Career Intelligence Agent — Architecture Diagram](./architecture.png)
+
+### Data Flow
+
+![JSO Career Intelligence Agent — Data Flow](./dataflow.png)
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), React, Tailwind CSS
+- **Backend**: Next.js API Routes (Node.js)
+- **AI SDK**: Vercel AI SDK (`ai`, `@ai-sdk/openai`)
+- **LLM (Cloud)**: OpenRouter — `meta-llama/llama-3.1-8b-instruct:free` (free tier)
+- **LLM (Local)**: Ollama with `llama3.1`
+- **PDF Parsing**: `pdfjs-dist` (runs in the browser, zero server dependency)
+- **Validation**: Zod structured output schema
+
+---
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Get your free key at https://openrouter.ai/keys
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧑‍💻 Running Locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+- Node.js 18+
+- (Optional) Ollama installed for local LLM — run `ollama run llama3.1`
 
-## Learn More
+```bash
+# Clone the repo
+git clone https://github.com/your-username/job-matching-agent.git
+cd job-matching-agent
 
-To learn more about Next.js, take a look at the following resources:
+# Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Add your .env file (see above)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Start the dev server
+npm run dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Deploying to Vercel
+
+**Vercel is all you need** — no additional services required.
+
+```bash
+npx vercel
+```
+
+Then in your **Vercel Dashboard → Settings → Environment Variables**, add:
+
+| Key | Value |
+|---|---|
+| `OPENROUTER_API_KEY` | Your OpenRouter API key |
+
+PDF parsing runs entirely in the user's browser (no Python or additional server), so the full app deploys as a single Vercel project.
+
+---
+
+## 🔄 Switching Between Local and Cloud LLM
+
+In `src/app/api/match/route.ts`:
+
+```typescript
+// Cloud (OpenRouter) — for deployment
+const openrouter = createOpenAI({ baseURL: 'https://openrouter.ai/api/v1', apiKey: OPENROUTER_API_KEY });
+model: openrouter('meta-llama/llama-3.1-8b-instruct:free')
+
+// Local (Ollama) — for development
+const ollama = createOpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' });
+model: ollama('llama3.1')
+```
+
+---
+
+## ⚖️ Ethics & Transparency
+
+- The agent **never automatically rejects** a candidate
+- All scoring logic is **fully explained** in the Agent Reasoning panel
+- Analysis is based **strictly on professional qualifications** — no assumptions about personal background
+- An **Algorithmic Fairness Disclaimer** is displayed on every analysis result
+
+---
+
+## 📁 Project Structure
+
+```
+job-matching-agent/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── match/route.ts     # AI Agent API route
+│   │   └── page.tsx               # Main dashboard UI
+│   └── lib/
+│       └── extractPdf.ts          # Client-side PDF extraction utility
+├── next.config.ts
+└── .env
+```
