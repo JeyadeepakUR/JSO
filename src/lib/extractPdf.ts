@@ -3,6 +3,10 @@
  * in the browser. No server round-trip or Python process needed.
  */
 export async function extractTextFromPDF(file: File): Promise<string> {
+    // Guard: this must only run in the browser. Should never be called server-side.
+    if (typeof window === 'undefined') {
+        throw new Error('extractTextFromPDF can only be called in the browser.');
+    }
     // Dynamically import pdfjs-dist only on the client side
     const pdfjsLib = await import('pdfjs-dist');
 
